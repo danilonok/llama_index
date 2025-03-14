@@ -429,6 +429,13 @@ class ChatMode(str, Enum):
     then query the query engine for a response.
     """
 
+    CONDENSE_PLUS_ORIGINAL = "condense_plus_original"
+    """Corresponds to `CondensePlusOriginalChatEngine`.
+
+    First generate a standalone question from conversation context and last message, 
+    than use it for retrieval and original query for a response.
+    """
+
     CONTEXT = "context"
     """Corresponds to `ContextChatEngine`.
 

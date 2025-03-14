@@ -54,6 +54,18 @@ class BaseQueryEngine(ChainableMixin, PromptMixin, DispatcherSpanMixin):
             QueryEndEvent(query=str_or_query_bundle, response=query_result)
         )
         return query_result
+    
+    @dispatcher.span
+    def multi_query(self, query_bundle1: QueryBundle, query_bundle2: QueryBundle) -> RESPONSE_TYPE:
+        """Handle multiple queries."""
+        dispatcher.event(QueryStartEvent(query=f"{query_bundle1.query_str} & {query_bundle2.query_str}"))
+        with self.callback_manager.as_trace("multi_query"):
+            query_result = self._multi_query(query_bundle1, query_bundle2)
+        dispatcher.event(
+            QueryEndEvent(query=f"{query_bundle1.query_str} & {query_bundle2.query_str}", response=query_result)
+        )
+        return query_result
+
 
     @dispatcher.span
     async def aquery(self, str_or_query_bundle: QueryType) -> RESPONSE_TYPE:
@@ -94,6 +106,10 @@ class BaseQueryEngine(ChainableMixin, PromptMixin, DispatcherSpanMixin):
 
     @abstractmethod
     def _query(self, query_bundle: QueryBundle) -> RESPONSE_TYPE:
+        pass
+
+    @abstractmethod
+    def _multi_query(self, query_bundle1: QueryBundle, query_bundle2: QueryBundle) -> RESPONSE_TYPE:
         pass
 
     @abstractmethod

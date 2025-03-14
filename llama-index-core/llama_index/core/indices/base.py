@@ -437,6 +437,15 @@ class BaseIndex(Generic[IS], ABC):
                 llm=llm,
                 **kwargs,
             )
+        if chat_mode == ChatMode.CONDENSE_PLUS_ORIGINAL:
+            # NOTE: lazy import
+            from llama_index.core.chat_engine import CondenseQuestionChatEngine
+
+            return CondenseQuestionChatEngine.from_defaults(
+                query_engine=query_engine,
+                llm=llm,
+                **kwargs,
+            )
         elif chat_mode == ChatMode.CONTEXT:
             from llama_index.core.chat_engine import ContextChatEngine
 

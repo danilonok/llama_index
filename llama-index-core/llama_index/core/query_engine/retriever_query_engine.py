@@ -185,6 +185,21 @@ class RetrieverQueryEngine(BaseQueryEngine):
         return response
 
     @dispatcher.span
+    def _multi_query(self, query_bundle1: QueryBundle, query_bundle2: QueryBundle) -> RESPONSE_TYPE:
+        """Retriever uses query_bundle1, and response is synthesized using query_bundle2."""
+        with self.callback_manager.event(
+            CBEventType.QUERY, payload={EventPayload.QUERY_STR: query_bundle.query_str}
+        ) as query_event:
+            nodes = self.retrieve(query_bundle1)
+            response = self._response_synthesizer.synthesize(
+                query=query_bundle2,
+                nodes=nodes,
+            )
+            query_event.on_end(payload={EventPayload.RESPONSE: response})
+
+        return response
+
+    @dispatcher.span
     async def _aquery(self, query_bundle: QueryBundle) -> RESPONSE_TYPE:
         """Answer a query."""
         with self.callback_manager.event(
